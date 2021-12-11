@@ -1,0 +1,31 @@
+name: auto-push-test
+on:
+  push:
+    branch:
+      - 'm0a/feature/workflow/**'
+jobs:
+  build:
+    name: auto-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      
+      - name: generate factory/schema:pb
+        run: |
+          date >> sample.txt
+        working-directory: ./
+
+      - name: Push diff files
+        run: |
+          git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          if (git diff --shortstat | grep '[0-9]'); then \
+            git add .; \
+            git commit -m "push diff files by github-actions"; \
+            git push \
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
