@@ -9,8 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
       
       - name: generate factory/schema:pb
         run: |
@@ -25,7 +23,7 @@ jobs:
           if (git diff --shortstat | grep '[0-9]'); then \
             git add .; \
             git commit -m "push diff files by github-actions"; \
-            git push \
+            git push origin HEAD:${GITHUB_REF}; \
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
